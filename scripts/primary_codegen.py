@@ -7,16 +7,28 @@ import gc
 import importlib.metadata
 import json
 from pathlib import Path
+from typing import Protocol
 
 EVALPLUS_VERSION = "0.3.1"
 DATASET_VERSION = "v0.1.10"
 MAX_NEW_TOKENS = 512
 
 
+class SupportsGenerationCap(Protocol):
+    max_new_tokens: int
+
+
 def line_count(path: Path) -> int:
     if not path.exists():
         return 0
     return sum(bool(line.strip()) for line in path.read_text(encoding="utf-8").splitlines())
+
+
+def enforce_generation_cap(model: SupportsGenerationCap) -> None:
+    """Override EvalPlus's version-dependent provider default."""
+    model.max_new_tokens = MAX_NEW_TOKENS
+    if model.max_new_tokens != MAX_NEW_TOKENS:
+        raise RuntimeError("failed to enforce the primary generation token cap")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -87,13 +99,13 @@ def main(argv: list[str] | None = None) -> int:
             model=snapshot_path,
             backend="hf",
             batch_size=1,
-            max_new_tokens=MAX_NEW_TOKENS,
             temperature=0.0,
             force_base_prompt=True,
             dataset="humaneval",
             attn_implementation="eager",
             dtype="bfloat16",
         )
+        enforce_generation_cap(model)
         codegen(
             target_path=str(output_path),
             model=model,
