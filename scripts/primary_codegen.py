@@ -10,6 +10,7 @@ from pathlib import Path
 
 EVALPLUS_VERSION = "0.3.1"
 DATASET_VERSION = "v0.1.10"
+MAX_NEW_TOKENS = 512
 
 
 def line_count(path: Path) -> int:
@@ -86,6 +87,7 @@ def main(argv: list[str] | None = None) -> int:
             model=snapshot_path,
             backend="hf",
             batch_size=1,
+            max_new_tokens=MAX_NEW_TOKENS,
             temperature=0.0,
             force_base_prompt=True,
             dataset="humaneval",
