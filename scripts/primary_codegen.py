@@ -19,6 +19,10 @@ class SupportsGenerationCap(Protocol):
     max_new_tokens: int
 
 
+class SupportsStopTexts(Protocol):
+    eos: list[str]
+
+
 def line_count(path: Path) -> int:
     if not path.exists():
         return 0
@@ -30,6 +34,11 @@ def enforce_generation_cap(model: SupportsGenerationCap) -> None:
     model.max_new_tokens = MAX_NEW_TOKENS
     if model.max_new_tokens != MAX_NEW_TOKENS:
         raise RuntimeError("failed to enforce the primary generation token cap")
+
+
+def deduplicate_stop_texts(model: SupportsStopTexts) -> None:
+    """Remove repeated EvalPlus stop strings while preserving their order."""
+    model.eos = list(dict.fromkeys(model.eos))
 
 
 def install_non_accumulating_codegen(decoder_class: type[Any]) -> None:
@@ -123,6 +132,7 @@ def main(argv: list[str] | None = None) -> int:
             attn_implementation="eager",
             dtype="bfloat16",
         )
+        deduplicate_stop_texts(model)
         enforce_generation_cap(model)
         codegen(
             target_path=str(output_path),

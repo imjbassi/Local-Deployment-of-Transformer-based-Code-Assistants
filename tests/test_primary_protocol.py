@@ -4,6 +4,7 @@ from types import SimpleNamespace
 
 from scripts.primary_codegen import (
     MAX_NEW_TOKENS,
+    deduplicate_stop_texts,
     enforce_generation_cap,
     install_non_accumulating_codegen,
 )
@@ -17,6 +18,14 @@ def test_evalplus_model_receives_explicit_512_token_cap() -> None:
 
     assert MAX_NEW_TOKENS == 512
     assert model.max_new_tokens == 512
+
+
+def test_repeated_evalplus_stop_texts_are_deduplicated_in_order() -> None:
+    model = SimpleNamespace(eos=["</s>", "\ndef ", "</s>", "\ndef ", "\nclass "])
+
+    deduplicate_stop_texts(model)
+
+    assert model.eos == ["</s>", "\ndef ", "\nclass "]
 
 
 def test_evalplus_stopping_hook_does_not_accumulate_between_tasks() -> None:
