@@ -6,8 +6,9 @@ import argparse
 import gc
 import importlib.metadata
 import json
+from functools import wraps
 from pathlib import Path
-from typing import Protocol
+from typing import Any, Protocol
 
 EVALPLUS_VERSION = "0.3.1"
 DATASET_VERSION = "v0.1.10"
@@ -31,6 +32,21 @@ def enforce_generation_cap(model: SupportsGenerationCap) -> None:
         raise RuntimeError("failed to enforce the primary generation token cap")
 
 
+def install_non_accumulating_codegen(decoder_class: type[Any]) -> None:
+    """Restore Transformers stopping hooks after every EvalPlus generation call."""
+    original_codegen = decoder_class.codegen
+
+    @wraps(original_codegen)
+    def codegen(decoder: Any, *args: Any, **kwargs: Any) -> Any:
+        original_stopping_hook = decoder.model._get_stopping_criteria
+        try:
+            return original_codegen(decoder, *args, **kwargs)
+        finally:
+            decoder.model._get_stopping_criteria = original_stopping_hook
+
+    decoder_class.codegen = codegen
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--targets", type=Path, default=Path("protocol/published_targets.json"))
@@ -46,6 +62,7 @@ def main(argv: list[str] | None = None) -> int:
     import torch
     from evalplus.codegen import codegen
     from evalplus.provider import make_model
+    from evalplus.provider.hf import HuggingFaceDecoder
     from huggingface_hub import snapshot_download
     from transformers import StoppingCriteria
 
@@ -70,6 +87,7 @@ def main(argv: list[str] | None = None) -> int:
             return any(text in decoded for text in self.stop_texts)
 
     stop_module.StopSequenceCriteria = DecodeOnceStopCriteria
+    install_non_accumulating_codegen(HuggingFaceDecoder)
 
     if not torch.cuda.is_available():
         raise RuntimeError("CUDA is required for the primary generation run")

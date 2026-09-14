@@ -1,0 +1,24 @@
+{
+  "date": "2026-09-14",
+  "evalplus_version": "0.3.1",
+  "model_id": "Qwen/Qwen2.5-Coder-0.5B",
+  "model_revision": "8123ea2e9354afb7ffcc6c8641d1b2f5ecf18301",
+  "tasks": [
+    "HumanEval/0",
+    "HumanEval/1"
+  ],
+  "condition": {
+    "decoding": "greedy",
+    "dtype": "bfloat16",
+    "max_new_tokens": 512,
+    "batch_size": 1
+  },
+  "change": "Restore model._get_stopping_criteria after each EvalPlus HuggingFaceDecoder.codegen call so task-local stop criteria do not accumulate across tasks.",
+  "comparison": {
+    "sanitized_first_two_records_sha256_before": "7319f97a39c62d702e2af3626331374b48996c2e89c339d384d23161d2bfd0d1",
+    "sanitized_first_two_records_sha256_after": "7319f97a39c62d702e2af3626331374b48996c2e89c339d384d23161d2bfd0d1",
+    "raw_first_two_records_sha256_before": "0251e13aeebe2609c2cb4dbd1097f9690f7361d326dacb0660db3fd4e9647d94",
+    "raw_first_two_records_sha256_after": "0251e13aeebe2609c2cb4dbd1097f9690f7361d326dacb0660db3fd4e9647d94",
+    "byte_identical": true
+  }
+}
