@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and releases use
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Evidence-backed technical report for the five-model primary experiment.
+- Canonical manuscript source, deterministic PDF builder, rendered PDF, and
+  internal claim-to-evidence review.
+- Regression checks tying manuscript counts and release boundaries to the
+  primary analysis artifacts.
+
 ## [1.0.0] - 2026-09-14
 
 ### Added

@@ -1,4 +1,5 @@
 import pytest
+
 from local_code_benchmark.analyze import analyze, kendall_tau_b
 
 TARGETS = {

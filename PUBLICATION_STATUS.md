@@ -6,9 +6,10 @@ The five-model primary experiment and preregistered analysis are complete. The
 primary decision is `failed_to_reproduce`; measured values and interpretation
 limits are in `RESULTS.md`, with auditable artifacts in `artifacts/primary`.
 
-This is not yet a completed archival paper. The historical PDF is not evidence
-for the new study and the removed self-audit manuscript must not be restored as
-the contribution.
+The repository now includes a versioned technical report of the completed
+primary experiment under `paper/`. It is not a completed archival or
+peer-reviewed paper. The historical PDF is not evidence for the new study and
+the removed self-audit manuscript must not be restored as the contribution.
 
 ## Release gate
 

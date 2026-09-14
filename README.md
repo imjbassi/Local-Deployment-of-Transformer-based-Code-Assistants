@@ -14,6 +14,10 @@ StarCoder2-3B reversed its ordering with Qwen2.5-Coder-0.5B. See
 boundary, and remaining release gates. The exact published targets remain
 machine-readable in [protocol/published_targets.json](protocol/published_targets.json).
 
+The evidence-backed technical report, its canonical Markdown source, build
+script, and internal claim review are in [paper](paper). The rendered PDF is
+[Do Published HumanEval Rankings Survive Local Deployment?](paper/output/pdf/Do_Published_HumanEval_Rankings_Survive_Local_Deployment.pdf).
+
 ## Primary comparison
 
 The five exact base checkpoints reported together in Qwen2.5-Coder Table 5 are:
