@@ -20,7 +20,7 @@ mkdir -p "$cache"
 
 # Fetch the pinned public test data before the untrusted-code phase loses network access.
 docker run --rm \
-  --mount "type=bind,src=$cache,dst=/cache,rw" \
+  --mount "type=bind,src=$cache,dst=/cache" \
   --env XDG_CACHE_HOME=/cache \
   "$image" \
   python -c "from evalplus.data import get_human_eval_plus; get_human_eval_plus(version='v0.1.10')"
@@ -34,9 +34,9 @@ docker run --rm \
   --memory 8g \
   --cpus 8 \
   --tmpfs /tmp:rw,noexec,nosuid,size=2g \
-  --mount "type=bind,src=$cache,dst=/cache,rw" \
+  --mount "type=bind,src=$cache,dst=/cache" \
   --env XDG_CACHE_HOME=/cache \
-  --mount "type=bind,src=$results_root,dst=/results,rw" \
+  --mount "type=bind,src=$results_root,dst=/results" \
   "$image" \
   evalplus.evaluate \
     --dataset humaneval \
