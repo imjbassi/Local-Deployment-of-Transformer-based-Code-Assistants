@@ -44,8 +44,11 @@ score deltas and HumanEval+ deltas are reported descriptively.
   every model and held constant across all five.
 - Hardware: one RTX 4070 12 GB GPU; batch size one.
 - Evaluator: EvalPlus v0.3.1 (`e5d0ed0bab96280b60b637ec7f15b5e4841b0cb2`)
-  with HumanEval+ dataset version v0.1.10 and evaluator image digest
-  `sha256:26b118098bef281fe8dfe999bf05f1d5b45374b4e6c00161ec0f30592aef4740`.
+  with HumanEval+ dataset version v0.1.10. The local evaluator image derives from
+  official base digest
+  `sha256:26b118098bef281fe8dfe999bf05f1d5b45374b4e6c00161ec0f30592aef4740`,
+  force-installs released EvalPlus 0.3.1, asserts that version, and records the
+  derived image ID.
 - Execution: disposable, network-isolated Linux container with no credentials or
   writable host mounts other than the result exchange directory.
 

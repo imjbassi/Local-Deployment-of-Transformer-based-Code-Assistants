@@ -9,11 +9,13 @@ fi
 samples="$(realpath "$1")"
 results_root="$(dirname "$samples")"
 sample_name="$(basename "$samples")"
-image="ganler/evalplus@sha256:26b118098bef281fe8dfe999bf05f1d5b45374b4e6c00161ec0f30592aef4740"
+base_image="ganler/evalplus@sha256:26b118098bef281fe8dfe999bf05f1d5b45374b4e6c00161ec0f30592aef4740"
+image="local-code-study/evalplus:0.3.1"
 cache="$results_root/evalplus-cache"
 
-docker pull "$image"
-printf '%s\n' "$image" > "$results_root/evaluator-image.txt"
+docker pull "$base_image"
+docker build --pull=false -t "$image" -f containers/evalplus/Dockerfile .
+docker image inspect "$image" --format '{{.Id}}' > "$results_root/evaluator-image.txt"
 mkdir -p "$cache"
 
 # Fetch the pinned public test data before the untrusted-code phase loses network access.

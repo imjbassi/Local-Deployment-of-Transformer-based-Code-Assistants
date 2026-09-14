@@ -22,5 +22,8 @@ an explicitly located virtual environment. The run script refuses caches with
 less than 30 GB available.
 
 Docker Desktop's service socket is present, but no Docker client is installed in
-the active Windows or Ubuntu PATH. The evaluator script is syntax-checked but
-cannot be called complete until its digest-pinned container runs successfully.
+the active Windows or Ubuntu PATH; the Windows client is available at its Docker
+Desktop installation path. The official image tagged v0.3.1 reports package
+version `0.4.0.dev2`, so the evaluator Dockerfile derives from its immutable
+digest and force-installs the released `evalplus==0.3.1`. The build asserts that
+version and evaluation records the derived image ID.
