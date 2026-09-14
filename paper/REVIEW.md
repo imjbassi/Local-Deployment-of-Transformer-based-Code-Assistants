@@ -1,6 +1,6 @@
 # Manuscript review
 
-Review date: 2026-09-14  
+Review date: 2026-09-14
 Scope: internal evidence, language, citation, and rendering review of version 1.0
 
 ## Verdict

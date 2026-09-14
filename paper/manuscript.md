@@ -2,11 +2,11 @@
 
 ## A Five-Model Reproduction on a Consumer GPU
 
-**Jaiveer Bassi**  
-Independent Researcher  
+**Jaiveer Bassi**
+Independent Researcher
 jaiveerbassi@yahoo.com
 
-**Technical report - primary experiment**  
+**Technical report - primary experiment**
 Version 1.0, September 14, 2026
 
 ## Abstract
