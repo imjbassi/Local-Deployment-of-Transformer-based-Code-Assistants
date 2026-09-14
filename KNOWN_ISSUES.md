@@ -14,6 +14,15 @@ evaluation implementation. If a model produces different output when an
 all-ones attention mask is supplied, report that as a predeclared implementation
 sensitivity analysis; do not silently replace the primary output.
 
+## EvalPlus stop-criterion performance
+
+The v0.3.1 stop criterion decodes the full completion separately for every stop
+string after every token. The primary generation wrapper substitutes an
+equivalent batch-one predicate that decodes once and tests all stop strings. A
+pinned one-task slow-path output must match the optimized raw and sanitized
+outputs byte-for-byte before full generation proceeds. The scientific condition
+is unchanged; only redundant decoding is removed.
+
 ## Host constraints
 
 The Windows system drive had approximately 13 GB free during setup. Primary

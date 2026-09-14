@@ -29,10 +29,34 @@ def main(argv: list[str] | None = None) -> int:
     if importlib.metadata.version("evalplus") != EVALPLUS_VERSION:
         raise RuntimeError(f"this protocol requires EvalPlus {EVALPLUS_VERSION}")
 
+    import stop_sequencer.stop_sequencer as stop_module
     import torch
     from evalplus.codegen import codegen
     from evalplus.provider import make_model
     from huggingface_hub import snapshot_download
+    from transformers import StoppingCriteria
+
+    class DecodeOnceStopCriteria(StoppingCriteria):
+        """Exact batch-one EvalPlus stop predicate with one decode per token."""
+
+        def __init__(self, model_type, tokenizer, stop_texts, input_length, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.model_type = model_type
+            self.tokenizer = tokenizer
+            self.stop_texts = stop_texts
+            self.input_length = input_length
+
+        def __call__(self, input_ids, scores, **kwargs):
+            del scores, kwargs
+            if input_ids.shape[0] != 1:
+                raise RuntimeError("the optimized primary stop criterion requires batch size one")
+            token_ids = input_ids[0].long().tolist()
+            if self.model_type == "causal":
+                token_ids = token_ids[self.input_length :]
+            decoded = self.tokenizer.decode(token_ids)
+            return any(text in decoded for text in self.stop_texts)
+
+    stop_module.StopSequenceCriteria = DecodeOnceStopCriteria
 
     if not torch.cuda.is_available():
         raise RuntimeError("CUDA is required for the primary generation run")

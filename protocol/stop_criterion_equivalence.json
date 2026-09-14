@@ -1,0 +1,18 @@
+{
+  "checkpoint": {
+    "model_id": "Qwen/Qwen2.5-Coder-0.5B",
+    "revision": "8123ea2e9354afb7ffcc6c8641d1b2f5ecf18301"
+  },
+  "task_id": "HumanEval/0",
+  "condition": {
+    "decoding": "greedy",
+    "dtype": "bfloat16",
+    "evalplus": "0.3.1",
+    "humaneval_plus": "v0.1.10"
+  },
+  "slow_and_optimized_outputs_byte_identical": true,
+  "sha256": {
+    "sanitized_jsonl": "b138808ba417c06c672c16c8a7b20ed308718ee52e1d83c43d385158f59f0550",
+    "raw_jsonl": "c79ac8895652e861f02c225d0a19a32d683657462d8628632546deb22fe509bd"
+  }
+}
