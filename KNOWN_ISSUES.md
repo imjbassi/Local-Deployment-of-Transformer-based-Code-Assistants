@@ -23,6 +23,28 @@ pinned one-task slow-path output must match the optimized raw and sanitized
 outputs byte-for-byte before full generation proceeds. The scientific condition
 is unchanged; only redundant decoding is removed.
 
+EvalPlus also leaves each task's wrapped Transformers stopping hook installed,
+which otherwise accumulates another criterion on every task. The primary wrapper
+restores the original hook in a `finally` block after every generation call.
+Raw and sanitized outputs for the first two Qwen0.5B tasks were byte-identical
+before and after this change; hashes are recorded in
+`protocol/stop_hook_restoration_equivalence.json`.
+
+The provider's stop-text list is derived from mutable shared state and can
+contain duplicates when several models are constructed sequentially. The runner
+de-duplicates identical strings while preserving first occurrence and order;
+this does not change the `any(stop in decoded)` predicate.
+
+## StarCoder2 prompt sensitivity
+
+The pinned StarCoder2-3B checkpoint scored 3/164 in the primary condition. A
+direct Transformers probe produced normal code for the model-card prompt but
+repeated the complete function definition for HumanEval/0. EvalPlus stops at a
+new top-level `def`, yielding an empty body. The result is retained rather than
+post-processed because changing the prompt or stop policy after observing scores
+would violate the primary protocol. Treat this as a deployment-condition result,
+not a claim that the published score is erroneous.
+
 ## Host constraints
 
 The Windows system drive had approximately 13 GB free during setup. Primary
@@ -30,9 +52,10 @@ weights and the WSL environment are therefore kept on D: through `HF_HOME` and
 an explicitly located virtual environment. The run script refuses caches with
 less than 30 GB available.
 
-Docker Desktop's service socket is present, but no Docker client is installed in
-the active Windows or Ubuntu PATH; the Windows client is available at its Docker
-Desktop installation path. The official image tagged v0.3.1 reports package
-version `0.4.0.dev2`, so the evaluator Dockerfile derives from its immutable
-digest and force-installs the released `evalplus==0.3.1`. The build asserts that
-version and evaluation records the derived image ID.
+Docker Desktop's Windows client was invoked from WSL through an explicit wrapper
+because it was not on the Ubuntu PATH. Set `DOCKER_DESKTOP_WINDOWS_PATHS=1` when
+using that arrangement so the script translates bind sources. The official
+image tagged v0.3.1 reports package version `0.4.0.dev2`, so the evaluator
+Dockerfile derives from its immutable digest and force-installs released
+`evalplus==0.3.1`. The build asserts that version and evaluation records the
+derived image ID.

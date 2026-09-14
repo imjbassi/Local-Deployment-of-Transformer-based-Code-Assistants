@@ -7,13 +7,12 @@ unsupported values in this repository's historical manuscript.
 
 ## Evidence status
 
-The benchmark software is tested, including a one-task pinned EvalPlus greedy
-generation probe on the RTX 4070. **No reportable accuracy result has been
-produced yet.** Do
-not cite the historical PDF's performance values, the smoke run, or any empty
-result table as empirical evidence. The preregistered decisions and compute
-budget are in [EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md); the exact published
-targets are machine-readable in [protocol/published_targets.json](protocol/published_targets.json).
+The preregistered primary run is complete for all five models and 164 tasks. The
+published ordering failed to reproduce (Kendall's tau-b = 0.8) because
+StarCoder2-3B reversed its ordering with Qwen2.5-Coder-0.5B. See
+[RESULTS.md](RESULTS.md) for the measured scores, decision rule, interpretation
+boundary, and remaining release gates. The exact published targets remain
+machine-readable in [protocol/published_targets.json](protocol/published_targets.json).
 
 ## Primary comparison
 
@@ -104,14 +103,14 @@ The pinned reference workflow is scripted:
 export HF_HOME=/mnt/d/model-cache/huggingface
 bash scripts/run_primary_codegen.sh
 bash scripts/evaluate_in_docker.sh \
-  results/evalplus/humaneval/Qwen--Qwen2.5-Coder-0.5B_hf_temp_0.0.jsonl
+  results/evalplus/humaneval/qwen2.5-coder-0.5b.jsonl
 ```
 
 The Docker script downloads the pinned public test data in a preparation step,
 then disables networking and drops Linux capabilities for the untrusted-code
-phase. Run it in a disposable Docker/WSL environment; Docker is not currently
-available in this checkout's Windows host, so the container path remains a
-release gate rather than a claimed completed test.
+phase. When invoking a Windows Docker Desktop client from WSL, set
+`DOCKER_DESKTOP_WINDOWS_PATHS=1` so bind sources are translated with `wslpath`.
+The released primary artifacts were evaluated through this hardened path.
 
 ## Outputs
 
@@ -133,6 +132,10 @@ After all five EvalPlus result files exist, convert them to the documented
 task-level outcome JSONL with `code-model-consolidate`, then run
 `code-model-analyze --output results/primary-analysis.json`. The analysis command
 refuses missing, duplicated, non-Boolean, or mismatched task records.
+
+The checked-in primary artifacts are in [artifacts/primary](artifacts/primary).
+They include untrusted model-generated Python; inspect them as data and execute
+them only inside an appropriate sandbox.
 
 ## Development checks
 

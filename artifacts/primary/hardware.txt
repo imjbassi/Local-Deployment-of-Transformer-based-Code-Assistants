@@ -1,0 +1,10 @@
+Capture time: 2026-09-14 13:42:03 America/Los_Angeles
+GPU: NVIDIA GeForce RTX 4070
+Architecture: Ada Lovelace
+Dedicated GPU memory: 12282 MiB
+Driver/KMD version: 610.62
+CUDA UMD version reported by nvidia-smi: 13.3
+Execution environment: WSL Ubuntu on Windows, one attached GPU
+
+Unique device identifiers, bus addresses, firmware identifiers, and live
+telemetry were intentionally omitted from this public artifact.
