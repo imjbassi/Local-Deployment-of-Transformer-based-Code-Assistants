@@ -1,0 +1,70 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "local-code-assistant-benchmark"
+version = "1.0.0"
+description = "Local reproduction study of published HumanEval model rankings"
+readme = "README.md"
+requires-python = ">=3.10,<3.14"
+license = { file = "LICENSE" }
+authors = [{ name = "Jaiveer Bassi" }]
+keywords = ["code-generation", "humaneval", "transformers", "local-llm"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  "datasets>=2.19,<5",
+  "psutil>=5.9,<8",
+  "torch>=2.2,<3",
+  "transformers>=4.56,<5",
+]
+
+[project.optional-dependencies]
+evaluation = [
+  "accelerate>=0.30,<2",
+  "evalplus @ git+https://github.com/evalplus/evalplus.git@e5d0ed0bab96280b60b637ec7f15b5e4841b0cb2",
+]
+quantization = [
+  "accelerate>=0.30,<2",
+  "bitsandbytes>=0.43,<1",
+]
+dev = [
+  "pytest>=8,<10",
+  "ruff>=0.9,<1",
+]
+
+[project.scripts]
+code-model-benchmark = "local_code_benchmark.cli:main"
+code-model-validate = "local_code_benchmark.validate:main"
+code-model-analyze = "local_code_benchmark.analyze:main"
+code-model-consolidate = "local_code_benchmark.consolidate:main"
+
+[project.urls]
+Repository = "https://github.com/imjbassi/Local-Deployment-of-Transformer-based-Code-Assistants"
+Protocol = "https://github.com/imjbassi/Local-Deployment-of-Transformer-based-Code-Assistants/blob/main/EXPERIMENT_PLAN.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/local_code_benchmark"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]

@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -ne 1 ]]; then
+  echo "usage: $0 PATH_TO_SANITIZED_SAMPLES.jsonl" >&2
+  exit 2
+fi
+
+samples="$(realpath "$1")"
+results_root="$(dirname "$samples")"
+sample_name="$(basename "$samples")"
+image="ganler/evalplus@sha256:26b118098bef281fe8dfe999bf05f1d5b45374b4e6c00161ec0f30592aef4740"
+cache="$results_root/evalplus-cache"
+
+docker pull "$image"
+printf '%s\n' "$image" > "$results_root/evaluator-image.txt"
+mkdir -p "$cache"
+
+# Fetch the pinned public test data before the untrusted-code phase loses network access.
+docker run --rm \
+  --mount "type=bind,src=$cache,dst=/cache,rw" \
+  --env XDG_CACHE_HOME=/cache \
+  "$image" \
+  python -c "from evalplus.data import get_human_eval_plus; get_human_eval_plus(version='v0.1.10')"
+
+docker run --rm \
+  --network none \
+  --read-only \
+  --cap-drop ALL \
+  --security-opt no-new-privileges \
+  --pids-limit 512 \
+  --memory 8g \
+  --cpus 8 \
+  --tmpfs /tmp:rw,noexec,nosuid,size=2g \
+  --mount "type=bind,src=$cache,dst=/cache,rw" \
+  --env XDG_CACHE_HOME=/cache \
+  --mount "type=bind,src=$results_root,dst=/results,rw" \
+  "$image" \
+  evalplus.evaluate \
+    --dataset humaneval \
+    --version v0.1.10 \
+    --samples "/results/$sample_name"

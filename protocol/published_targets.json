@@ -1,0 +1,45 @@
+{
+  "source": {
+    "title": "Qwen2.5-Coder Technical Report",
+    "table": 5,
+    "url": "https://arxiv.org/abs/2409.12186"
+  },
+  "scale": "percentage_points",
+  "models": [
+    {
+      "key": "qwen2.5-coder-0.5b",
+      "model_id": "Qwen/Qwen2.5-Coder-0.5B",
+      "revision": "8123ea2e9354afb7ffcc6c8641d1b2f5ecf18301",
+      "humaneval": 28.0,
+      "humaneval_plus": 23.8
+    },
+    {
+      "key": "starcoder2-3b",
+      "model_id": "bigcode/starcoder2-3b",
+      "revision": "733247c55e3f73af49ce8e9c7949bf14af205928",
+      "humaneval": 31.7,
+      "humaneval_plus": 27.4
+    },
+    {
+      "key": "deepseek-coder-1.3b",
+      "model_id": "deepseek-ai/deepseek-coder-1.3b-base",
+      "revision": "c919139c3a9b4070729c8b2cca4847ab29ca8d94",
+      "humaneval": 34.8,
+      "humaneval_plus": 26.8
+    },
+    {
+      "key": "qwen2.5-coder-1.5b",
+      "model_id": "Qwen/Qwen2.5-Coder-1.5B",
+      "revision": "df3ce67c0e24480f20468b6ef2894622d69eb73b",
+      "humaneval": 43.9,
+      "humaneval_plus": 36.6
+    },
+    {
+      "key": "qwen2.5-coder-3b",
+      "model_id": "Qwen/Qwen2.5-Coder-3B",
+      "revision": "09d9bc5d376b0cfa0100a0694ea7de7232525803",
+      "humaneval": 52.4,
+      "humaneval_plus": 42.7
+    }
+  ]
+}

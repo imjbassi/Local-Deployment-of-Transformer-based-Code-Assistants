@@ -1,59 +1,165 @@
-# Local Deployment of Transformer-based Code Assistants
+# Do Published HumanEval Rankings Survive Local Deployment?
 
-This project benchmarks lightweight transformer-based language models for offline Python code generation, focusing on practical trade-offs between speed, accuracy, and resource efficiency.
+This repository tests whether a published ordering of small, open code models is
+preserved on a single consumer GPU. The primary target is Table 5 of the
+[Qwen2.5-Coder technical report](https://arxiv.org/abs/2409.12186), not the
+unsupported values in this repository's historical manuscript.
 
-## Overview
+## Evidence status
 
-Modern AI coding assistants like GitHub Copilot offer powerful support but raise concerns around privacy, latency, and cloud dependency. This study investigates offline deployment of two transformer models—**CodeT5** and **StarCoder**—integrated into a local VS Code environment to simulate real-world usage.
+The benchmark software is tested, including a one-task pinned EvalPlus greedy
+generation probe on the RTX 4070. **No reportable accuracy result has been
+produced yet.** Do
+not cite the historical PDF's performance values, the smoke run, or any empty
+result table as empirical evidence. The preregistered decisions and compute
+budget are in [EXPERIMENT_PLAN.md](EXPERIMENT_PLAN.md); the exact published
+targets are machine-readable in [protocol/published_targets.json](protocol/published_targets.json).
 
-## Paper
+## Primary comparison
 
-**Title:** Local Deployment of Transformer-based Code Assistants: Balancing Speed, Accuracy, and Efficiency  
-**Author:** Jaiveer Bassi  
-**Preprint:** [TechRxiv link coming soon]  
-**Institution:** Grand Canyon University
+The five exact base checkpoints reported together in Qwen2.5-Coder Table 5 are:
 
-## Models Evaluated
+| Checkpoint | Published HumanEval | Published HumanEval+ |
+|---|---:|---:|
+| Qwen2.5-Coder-0.5B | 28.0 | 23.8 |
+| StarCoder2-3B | 31.7 | 27.4 |
+| DeepSeek-Coder-1.3B | 34.8 | 26.8 |
+| Qwen2.5-Coder-1.5B | 43.9 | 36.6 |
+| Qwen2.5-Coder-3B | 52.4 | 42.7 |
 
-- **CodeT5-small (60M parameters)**
-- **CodeT5-base (220M parameters)**
-- **StarCoder (15B parameters)**
+The primary run uses greedy decoding, one completion per task, the base-model
+prompt, and full-precision weights. EvalPlus scores the same completions against
+HumanEval and HumanEval+. Sampling, prompts, and quantization are secondary
+sensitivity analyses and cannot replace the primary endpoint.
 
-## Benchmark Setup
+## Install
 
-- **Task:** Python code completion on the HumanEval benchmark
-- **Metrics:**
-  - Pass@1 and Pass@5 for functional correctness
-  - Inference speed (tokens/sec)
-- **Environment:** NVIDIA RTX 3090 GPU, Hugging Face Transformers, PyTorch, VS Code extension
+Use Python 3.10-3.13 in an isolated environment:
 
-## Key Results
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev,evaluation]"
+```
 
-| Model               | Params | Pass@1 | Pass@5 | Speed (tokens/s) |
-|--------------------|--------|--------|--------|------------------|
-| CodeT5-Small        | 60M    | 15.0%  | 28.5%  | 450              |
-| CodeT5-Base         | 220M   | 23.0%  | 42.0%  | 300              |
-| StarCoder (default) | 15B    | 33.6%  | 56.2%  | 55               |
-| StarCoder (prompted)| 15B    | 40.8%  | 65.0%  | 50               |
+On Windows PowerShell, activate with `.venv\Scripts\Activate.ps1`. Install the
+appropriate CUDA-enabled PyTorch build first for NVIDIA hardware.
 
-## Highlights
+The verified WSL/CUDA environment is constrained in
+[`protocol/constraints-wsl-cu128.txt`](protocol/constraints-wsl-cu128.txt).
+Pass it with pip's `--constraint` option and use the CUDA 12.8 PyTorch index when
+reconstructing the primary environment. Runtime `pip freeze`, GPU details, Git
+state, and model revisions are captured again by the run script.
 
-- **StarCoder** provides the highest accuracy but requires significant GPU resources.
-- **CodeT5-base** offers a good balance between accuracy and latency for local deployment.
-- Offline coding assistants are feasible and beneficial for privacy-sensitive development.
+## Safe smoke test
 
-## Implementation
+Generation-only mode does not execute model output:
 
-- Built using Hugging Face Transformers
-- Integrated into a VS Code extension via Language Server Protocol
-- Models served through a local Python backend for in-editor code completions
+```bash
+code-model-benchmark \
+  --models qwen2.5-coder-0.5b \
+  --limit 2 \
+  --samples-per-task 1 \
+  --max-new-tokens 64 \
+  --decoding greedy \
+  --output-dir results/smoke
+code-model-validate results/smoke
+```
 
-## Future Work
+`--limit` is only for pipeline checks and never produces a reportable
+HumanEval score.
 
-- Extend benchmarks to other models (CodeLlama, QwenCoder)
-- Add support for additional tasks (e.g., bug fixing, summarization)
-- Explore compression techniques and real-time streaming in the IDE
+## Instrumented diagnostic runner
 
-## License
+The package runner records detailed generation timing and environment artifacts.
+It is useful for smoke tests and the separate performance study:
 
-This project is released under an open license for academic and non-commercial use. See `LICENSE` for details.
+```bash
+code-model-benchmark \
+  --mode generation \
+  --models qwen2.5-coder-0.5b \
+  --samples-per-task 1 \
+  --max-new-tokens 512 \
+  --decoding greedy \
+  --device cuda \
+  --dtype bfloat16 \
+  --output-dir results/primary/qwen2.5-coder-0.5b
+```
+
+This command is not the source of the paper's correctness scores. The primary
+correctness workflow uses EvalPlus for prompt construction, generation
+sanitization, and both HumanEval test suites so it stays aligned with the
+published comparison.
+
+## Primary correctness workflow
+
+EvalPlus also warns that base checkpoints with chat templates must use a forced
+base prompt. The primary study therefore records this explicitly rather than
+relying on automatic prompt detection.
+
+The pinned reference workflow is scripted:
+
+```bash
+export HF_HOME=/mnt/d/model-cache/huggingface
+bash scripts/run_primary_codegen.sh
+bash scripts/evaluate_in_docker.sh \
+  results/evalplus/humaneval/Qwen--Qwen2.5-Coder-0.5B_hf_temp_0.0.jsonl
+```
+
+The Docker script downloads the pinned public test data in a preparation step,
+then disables networking and drops Linux capabilities for the untrusted-code
+phase. Run it in a disposable Docker/WSL environment; Docker is not currently
+available in this checkout's Windows host, so the container path remains a
+release gate rather than a claimed completed test.
+
+## Outputs
+
+Every run directory contains:
+
+| File | Purpose |
+|---|---|
+| `run_config.json` | Complete configuration and pinned dataset revision |
+| `environment.json` | Git state, device, runtime, and dependency versions |
+| `samples.jsonl` | Completion, task, sample, seed, and token count |
+| `timings.jsonl` | Every timed generation call |
+| `metrics.json` | Aggregate timing, memory, and confidence intervals |
+
+The validator checks model identity, counts, duplicate records, and required
+files. Correctness outcomes come only from EvalPlus and are checked by the
+consolidation and analysis commands.
+
+After all five EvalPlus result files exist, convert them to the documented
+task-level outcome JSONL with `code-model-consolidate`, then run
+`code-model-analyze --output results/primary-analysis.json`. The analysis command
+refuses missing, duplicated, non-Boolean, or mismatched task records.
+
+## Development checks
+
+```bash
+python -m pip install -e ".[dev]"
+ruff check .
+pytest
+python -m build
+```
+
+CI performs linting, unit tests, and package builds without downloading weights
+or executing generated code. See [CONTRIBUTING.md](CONTRIBUTING.md),
+[SECURITY.md](SECURITY.md), and [PUBLICATION_STATUS.md](PUBLICATION_STATUS.md)
+before opening a release or paper submission. Current execution caveats are in
+[KNOWN_ISSUES.md](KNOWN_ISSUES.md).
+
+## Historical material
+
+The unsupported original PDF has been removed from the release tree; Git history
+retains the prior file. Its results are not incorporated into the new study. A
+short internal provenance statement is in
+[notes/PROVENANCE.md](notes/PROVENANCE.md); there is deliberately no publishable
+audit manuscript.
+
+## License and citation
+
+Software and documentation are MIT licensed. Models, HumanEval, and EvalPlus
+retain their upstream licenses. Citation metadata in [CITATION.cff](CITATION.cff)
+describes the software protocol only; update it only after validated result
+artifacts and a public archive exist.
