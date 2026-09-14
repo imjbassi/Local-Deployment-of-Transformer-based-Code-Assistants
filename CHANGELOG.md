@@ -9,7 +9,7 @@ All notable changes to this project are documented here. The format follows
 ### Added
 
 - Evidence-backed technical report for the five-model primary experiment.
-- Canonical manuscript source, deterministic PDF builder, rendered PDF, and
+- Canonical LaTeX and BibTeX sources, Tectonic build script, rendered PDF, and
   internal claim-to-evidence review.
 - Regression checks tying manuscript counts and release boundaries to the
   primary analysis artifacts.

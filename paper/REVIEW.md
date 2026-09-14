@@ -1,7 +1,7 @@
 # Manuscript review
 
 Review date: 2026-09-14
-Scope: internal evidence, language, citation, and rendering review of version 1.0
+Scope: internal evidence, LaTeX, citation, and rendering review of version 1.0
 
 ## Verdict
 
@@ -9,6 +9,21 @@ The manuscript is suitable as a transparent technical report of the completed
 primary experiment. It is not labeled peer reviewed or presented as a completed
 archival study. The planned stochastic sensitivity condition and an independent
 second-person review remain open publication gates.
+
+The canonical source is `main.tex`, the bibliography is maintained in
+`references.bib`, and the checked-in PDF is compiled from those files with
+Tectonic.
+
+## Build and rendering review
+
+- Tectonic 0.17.0 completed the LaTeX and BibTeX passes successfully.
+- The final log contains no overfull boxes, unresolved citations, unresolved
+  references, or LaTeX errors.
+- All five PDF pages were rendered with Poppler and inspected at 130 DPI.
+- Both full-width tables, the vector result figure, headers, footers, hyperlinks,
+  column transitions, and the balanced bibliography render without clipping or
+  overlap.
+- All Latin Modern fonts used by the PDF are embedded and subsetted.
 
 ## Claim-to-evidence audit
 
